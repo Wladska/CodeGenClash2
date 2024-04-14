@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DepartmentRepository extends JpaRepository<Department, Long> {
-    Optional<Department> findByEmployeeId(Long employeeId);
 
     Optional<Department> findById(Long id);
 
