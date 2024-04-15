@@ -1,5 +1,6 @@
 package com.wladska.masters.experiment2.services;
 
+import com.wladska.masters.experiment2.dtos.DepartmentDTO;
 import com.wladska.masters.experiment2.dtos.EmployeeDTO;
 import com.wladska.masters.experiment2.entities.Department;
 import com.wladska.masters.experiment2.entities.Employee;
@@ -9,6 +10,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeService {
@@ -21,35 +23,48 @@ public class EmployeeService {
         this.departmentRepository = departmentRepository;
     }
 
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    public EmployeeDTO toEmployeeDTO(Employee employee) {
+        EmployeeDTO dto = new EmployeeDTO();
+        dto.setId(employee.getId());
+        dto.setName(employee.getName());
+        dto.setEmail(employee.getEmail());
+        dto.setDepartment(employee.getDepartment().getId()); // get the id of the department
+        return dto;
+    }
+
+    public List<EmployeeDTO> getAllEmployees() {
+        return employeeRepository.findAll().stream()
+            .map(this::toEmployeeDTO)
+            .collect(Collectors.toList());
     }
 
     // Implement other CRUD operations...
 
-    public Employee getEmployeeById(Long id) {
-        return employeeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+    public EmployeeDTO getEmployeeById(Long id) {
+        Employee employee = employeeRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+        return toEmployeeDTO(employee);
     }
 
-    public Employee createEmployee(EmployeeDTO employeeDTO) {
+    public EmployeeDTO createEmployee(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
         employee.setName(employeeDTO.getName());
         employee.setEmail(employeeDTO.getEmail());
-        Long id = employeeDTO.getDepartment();
-        employee.setDepartment(departmentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + id)));
-        return employeeRepository.save(employee);
+        employee.setDepartment(departmentRepository.findById(employeeDTO.getDepartment())
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + employeeDTO.getDepartment())));
+        Employee savedEmployee = employeeRepository.save(employee);
+        return toEmployeeDTO(savedEmployee);
     }
 
-    public Employee updateEmployee(Long id, EmployeeDTO employeeDTO) {
+    public EmployeeDTO updateEmployee(Long id, EmployeeDTO employeeDTO) {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
         employee.setName(employeeDTO.getName());
         employee.setEmail(employeeDTO.getEmail());
-        employee.setDepartment(departmentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + id)));
-        return employeeRepository.save(employee);
+        employee.setDepartment(departmentRepository.findById(employeeDTO.getDepartment())
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + employeeDTO.getDepartment())));
+        Employee updatedEmployee = employeeRepository.save(employee);
+        return toEmployeeDTO(updatedEmployee);
     }
 
     public void deleteEmployee(Long id) {
@@ -58,9 +73,19 @@ public class EmployeeService {
         employeeRepository.delete(employee);
     }
 
-    public Department getDepartmentByEmployeeId(Long id) {
+    public DepartmentDTO getDepartmentByEmployeeId(Long id) {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
-        return employee.getDepartment();
+            .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+        return toDepartmentDTO(employee.getDepartment());
+    }
+
+    private DepartmentDTO toDepartmentDTO(Department department) {
+        DepartmentDTO dto = new DepartmentDTO();
+        dto.setId(department.getId());
+        dto.setName(department.getName());
+        dto.setEmployeeIds(department.getEmployees().stream()
+            .map(Employee::getId)
+            .collect(Collectors.toList()));
+        return dto;
     }
 }

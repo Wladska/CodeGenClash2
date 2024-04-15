@@ -1,9 +1,9 @@
 package com.wladska.masters.experiment2.controllers;
 
+import com.wladska.masters.experiment2.dtos.DepartmentDTO;
 import com.wladska.masters.experiment2.dtos.EmployeeDTO;
-import com.wladska.masters.experiment2.entities.Department;
-import com.wladska.masters.experiment2.entities.Employee;
 import com.wladska.masters.experiment2.services.EmployeeService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,22 +19,22 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public List<Employee> getAllEmployees() {
+    public List<EmployeeDTO> getAllEmployees() {
         return employeeService.getAllEmployees();
     }
 
     @GetMapping("/{id}")
-    public Employee getEmployeeById(@PathVariable Long id) {
+    public EmployeeDTO getEmployeeById(@PathVariable Long id) {
         return employeeService.getEmployeeById(id);
     }
 
     @PostMapping
-    public Employee createEmployee(@RequestBody EmployeeDTO employeeDTO) {
+    public EmployeeDTO createEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) {
         return employeeService.createEmployee(employeeDTO);
     }
 
     @PutMapping("/{id}")
-    public Employee updateEmployee(@PathVariable Long id, @RequestBody EmployeeDTO employeeDTO) {
+    public EmployeeDTO updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employeeDTO) {
         return employeeService.updateEmployee(id, employeeDTO);
     }
 
@@ -44,7 +44,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}/department")
-    public Department getDepartmentByEmployeeId(@PathVariable Long id) {
+    public DepartmentDTO getDepartmentByEmployeeId(@PathVariable Long id) {
         return employeeService.getDepartmentByEmployeeId(id);
     }
 }
