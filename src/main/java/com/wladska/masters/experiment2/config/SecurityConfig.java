@@ -12,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -19,16 +20,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserDetailsService userDetailsService;
-    @Override
+    @Autowired
+    private JwtAuthorizationFilter jwtAuthorizationFilter;
+
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()  // Disable CSRF as you're likely using tokens
+                .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/api/auth/login").permitAll()  // Allow everyone to access login
-                .anyRequest().authenticated()  // Require authentication for any other request
+                .antMatchers("/api/auth/login").permitAll()
+                .anyRequest().authenticated()
                 .and()
-                .httpBasic().disable()  // Disable HTTP Basic authentication
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);  // No session
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class) // Ensure this is added
+                .httpBasic().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
     @Override

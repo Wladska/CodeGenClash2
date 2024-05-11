@@ -22,6 +22,8 @@ dependencies {
 	runtimeOnly("com.h2database:h2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
+
+	implementation("io.jsonwebtoken:jjwt:0.12.5")
 }
 
 tasks.withType<Test> {

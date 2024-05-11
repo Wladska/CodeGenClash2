@@ -35,13 +35,13 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (departmentRepository.count() == 0 && userRepository.count() == 0) {
             // Creating departments
-            Department it = new Department(null, "Information Technology", null);
-            Department hr = new Department(null, "Human Resources", null);
+            Department it = new Department(1L, "Information Technology", null);
+            Department hr = new Department(2L, "Human Resources", null);
             departmentRepository.saveAll(Arrays.asList(it, hr));
 
             // Creating employees and linking them to departments
-            Employee emp1 = new Employee(null, "John Doe", "Software Engineer", 90000, it);
-            Employee emp2 = new Employee(null, "Jane Smith", "HR Manager", 85000, hr);
+            Employee emp1 = new Employee(1L, "John Doe", "Software Engineer", 90000, it);
+            Employee emp2 = new Employee(2L, "Jane Smith", "HR Manager", 85000, hr);
             it.setEmployees(Arrays.asList(emp1));
             hr.setEmployees(Arrays.asList(emp2));
             employeeRepository.saveAll(Arrays.asList(emp1, emp2));
