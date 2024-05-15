@@ -31,8 +31,8 @@ public class UserController {
      * @param id The ID of the user to retrieve.
      * @return The user details.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         User user = userService.findById(id);
         if (user == null) {
@@ -48,7 +48,7 @@ public class UserController {
      * @return The updated user.
      */
     @PutMapping("/{id}")
-    @PreAuthorize("#id == principal.id or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
         User updatedUser = userService.updateUser(id, user);
         if (updatedUser == null) {

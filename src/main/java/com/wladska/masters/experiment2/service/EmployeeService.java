@@ -1,12 +1,12 @@
 package com.wladska.masters.experiment2.service;
 
-import com.wladska.masters.experiment2.exception.ResourceNotFoundException;
 import com.wladska.masters.experiment2.model.Employee;
 import com.wladska.masters.experiment2.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmployeeService {
@@ -17,11 +17,16 @@ public class EmployeeService {
         return employeeRepository.findAll();
     }
 
-    // Additional methods to handle CRUD operations
-
-    public Employee findEmployeeById(Long id) {
-        return employeeRepository.findById(id).orElseThrow(() ->
-                new ResourceNotFoundException("Employee not found with id " + id)
-        );
+    public Employee save(Employee employee) {
+        return employeeRepository.save(employee);
     }
+
+    public void delete(Employee employee) {
+        employeeRepository.delete(employee);
+    }
+
+    public Optional<Employee> findById(Long id) {
+        return employeeRepository.findById(id);
+    }
+
 }
