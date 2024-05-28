@@ -2,6 +2,7 @@ package com.wladska.masters.experiment2.controller;
 
 import com.wladska.masters.experiment2.dtos.DepartmentDTO;
 import com.wladska.masters.experiment2.dtos.EmployeeDTO;
+import com.wladska.masters.experiment2.exception.ResourceNotFoundException;
 import com.wladska.masters.experiment2.model.Department;
 import com.wladska.masters.experiment2.model.Employee;
 import com.wladska.masters.experiment2.repository.DepartmentRepository;
@@ -65,39 +66,43 @@ public class EmployeeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable Long id) {
-        return employeeService.findById(id)
-                .map(employee -> ResponseEntity.ok(convertToDTO(employee))) // Convert to DTO before sending the response
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        Employee employee = employeeService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+
+        return ResponseEntity.ok(convertToDTO(employee));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
-        return employeeService.findById(id)
-                .map(existingEmployee -> {
-                    existingEmployee.setName(employeeDetails.getName());
-                    existingEmployee.setPosition(employeeDetails.getPosition());
-                    existingEmployee.setSalary(employeeDetails.getSalary());
-                    existingEmployee.setDepartment(employeeDetails.getDepartment());
-                    Employee updatedEmployee = employeeService.save(existingEmployee);
-                    return ResponseEntity.ok(updatedEmployee);
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        Employee existingEmployee = employeeService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+
+        existingEmployee.setName(employeeDetails.getName());
+        existingEmployee.setPosition(employeeDetails.getPosition());
+        existingEmployee.setSalary(employeeDetails.getSalary());
+        existingEmployee.setDepartment(employeeDetails.getDepartment());
+        Employee updatedEmployee = employeeService.save(existingEmployee);
+
+        return ResponseEntity.ok(updatedEmployee);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> deleteEmployee(@PathVariable Long id) {
-        return employeeService.findById(id)
-                .map(employee -> {
-                    String name = employee.getName();
-                    employeeService.delete(employee);
-                    Map<String, String> response = new HashMap<>();
-                    response.put("name", name);
-                    response.put("message", "Employee deleted successfully");
-                    return ResponseEntity.ok(response);
-                })
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        Employee employee = employeeService.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
+
+        // Capture employee name before deletion for response
+        String name = employee.getName();
+        employeeService.delete(employee);
+
+        // Prepare response map
+        Map<String, String> response = new HashMap<>();
+        response.put("name", name);
+        response.put("message", "Employee deleted successfully");
+
+        return ResponseEntity.ok(response);
     }
 
     private EmployeeDTO convertToDTO(Employee employee) {

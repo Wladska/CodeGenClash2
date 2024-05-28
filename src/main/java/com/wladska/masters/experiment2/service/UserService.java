@@ -1,5 +1,6 @@
 package com.wladska.masters.experiment2.service;
 
+import com.wladska.masters.experiment2.exception.ResourceNotFoundException;
 import com.wladska.masters.experiment2.model.User;
 import com.wladska.masters.experiment2.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class UserService {
      * @return An Optional containing the user if found, or an empty Optional if not found.
      */
     public User findById(Long id) {
-        return userRepository.findById(id).orElse(null);
+        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Failed to find user: " + id));
     }
 
     /**
@@ -52,7 +53,7 @@ public class UserService {
                 user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
             }
             return userRepository.save(user);
-        }).orElse(null);
+        }).orElseThrow(() -> new ResourceNotFoundException("Failed to update user: " + id));
     }
 
     /**
